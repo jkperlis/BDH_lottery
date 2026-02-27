@@ -7,12 +7,12 @@ from datetime import datetime
 from collections import defaultdict
 # Settings
 RESET = True
-GDB_PATH = r"C:\Users\jperlis\OneDrive - Brown University\Documents\ArcGIS\Projects\DataDesk_housing_automatedTEST1\DataDesk_housing_automatedTEST1.gdb"
+GDB_PATH = r"file path"
 # Folder with data:
-SNAPSHOT_FOLDER = r"C:\Users\jperlis\Downloads\Data"
+SNAPSHOT_FOLDER = r"file path"
 SNAPSHOT_PREFIX = "spring_room_selection_"
 SNAPSHOT_YEAR = 2025
-LOOKUP_CSV = r"C:\Users\jperlis\Downloads\bdh_datadesk_lottery_ref_1.csv"
+LOOKUP_CSV = r"file path"
 DORM_POLYGONS = "brown_basemap"
 TIME_SERIES_FC = "Dorm_RoomAvailability_TimeSeries"
 INVENTORY_TABLE = "Dorm_RoomInventory"
