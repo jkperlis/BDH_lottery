@@ -227,7 +227,9 @@
           const layer = new FeatureLayer({
             url: layerUrl,
             outFields: ["*"],
-            popupEnabled: false
+            popupEnabled: false,
+            labelingInfo: [],
+            labelsVisible: true
           });
 
           const map = new Map({
@@ -255,6 +257,60 @@
           });
 
           view.popup.autoOpenEnabled = false; // IMPORTANT: we control popup manually
+
+          function makeLabelingInfo(g, s, metric) {
+            const aFld = availField(g, s);
+            const tFld = totalField(g, s);
+            const pFld = pctField(g, s);
+
+            // Arcade label expression
+            // Gray/no-room buildings can be hidden from labels if Total == 0
+            const expr = metric === "pct"
+                ? `
+                var name = DefaultValue($feature.Building_Name, DefaultValue($feature.Building, ""));
+                var t = $feature.${tFld};
+                var p = $feature.${pFld};
+
+                if (t == null || t == 0) { return ""; }  // hide labels for no-room buildings
+
+                if (p == null) { p = 0; }
+                if (p <= 1) { p = p * 100; } // if stored as 0-1
+
+                return name + TextFormatting.NewLine + Round(p, 0) + "%";
+                `
+                : `
+                var name = DefaultValue($feature.Building_Name, DefaultValue($feature.Building, ""));
+                var t = $feature.${tFld};
+                var a = $feature.${aFld};
+
+                if (t == null || t == 0) { return ""; }  // hide labels for no-room buildings
+
+                if (a == null) { a = 0; }
+
+                return name + TextFormatting.NewLine + a;
+                `;
+
+            return [
+                {
+                labelExpressionInfo: {
+                    expression: expr
+                },
+                symbol: {
+                    type: "text",
+                    color: [30, 30, 30, 1],
+                    haloColor: [255, 255, 255, 0.95],
+                    haloSize: 1.5,
+                    font: {
+                    family: "sans-serif",
+                    size: 10,
+                    weight: "bold"
+                    }
+                },
+                labelPlacement: "always-horizontal",
+                minScale: 4000
+                }
+            ];
+          }
 
           // ---- UI PANEL ----
           const panel = document.createElement("div");
@@ -697,6 +753,9 @@
                 layer.renderer = result.renderer;
                 renderClassLegend("Rooms available",layer.renderer);
             }
+
+            layer.labelingInfo = makeLabelingInfo(g, s, m);
+            layer.labelsVisible = true;
           }
 
           function safeOn(el, event, handler, name) {
